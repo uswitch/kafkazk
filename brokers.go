@@ -8,13 +8,16 @@ import (
 	"time"
 )
 
+// A KafkaBroker has a host and a port
 type KafkaBroker struct {
 	Host string `json:"host"`
 	Port int    `json:"port"`
 }
 
-var noBrokersError = errors.New("brokers: no brokers found in zookeeper")
+var errNoBrokers = errors.New("brokers: no brokers found in zookeeper")
 
+// LookupBrokers returns the Kafka brokers whose locations are known by
+// the Zookeeper instance at the given address, or an error
 func LookupBrokers(zkString string) ([]*KafkaBroker, error) {
 	conn, channel, err := zookeeper.Dial(zkString, time.Second*15)
 
@@ -38,7 +41,7 @@ func LookupBrokers(zkString string) ([]*KafkaBroker, error) {
 				}
 
 				if len(brokerIds) == 0 {
-					return nil, noBrokersError
+					return nil, errNoBrokers
 				}
 
 				for _, bid := range brokerIds {
